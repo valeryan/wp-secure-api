@@ -25,22 +25,25 @@
  */
 function is_not_auth_uri()
 {
-    $auth_uris = ['/wp-json/jwt-auth/v1/token', '/wp-json/jwt-auth/v1/token/validate'];
+    $known_auth_uris = [
+        '/wp-json/jwt-auth/v1/token',
+        '/wp-json/jwt-auth/v1/token/validate',
+    ];
 
-    $uri = $_SERVER['REQUEST_URI'];
-    return ! in_array($uri, $auth_uris);
+    $uri = rtrim($_SERVER['REQUEST_URI'], '/');
+    return ! in_array($uri, $known_auth_uris);
 }
 
 /**
  * Add filter to secure api request
  */
-add_filter( 'rest_authentication_errors', function( $result ) {
-    if ( ! empty( $result ) ) {
+add_filter('rest_authentication_errors', function ($result) {
+    if (! empty($result)) {
         return $result;
     }
 
-    if ( ! is_user_logged_in() && is_not_auth_uri()) {
-        return new WP_Error( 'rest_not_logged_in', 'You are not currently logged in.', ['status' => 401]);
+    if (! is_user_logged_in() && is_not_auth_uri()) {
+        return new WP_Error('rest_not_logged_in', 'You are not currently logged in.', ['status' => 401]);
     }
     return $result;
 });
